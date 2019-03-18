@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import Annotation from './Annotation.js';
 
 class App extends Component {
 
@@ -11,7 +12,8 @@ class App extends Component {
       annotationArray: [],
       progress: 0,
       videoDuration: 100, // need to set to videos actual duration
-      test: [1, 2, 3]
+      displayAnnotations: false,
+      annotations: []
     };
   }
 
@@ -21,6 +23,7 @@ class App extends Component {
 
     // need to get progress bar to automatically update progress bars value
   }
+
   pauseVideo() {
     this.refs.vidRef.pause();
     this.refs.vidRef2.pause();
@@ -63,14 +66,13 @@ class App extends Component {
   }
 
   addAnnotation() {
-    this.setState({annotationArray: [...this.state.annotationArray, this.refs.vidRef.currentTime]});
+    this.setState({annotations: [...this.state.annotations, {id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime}]});
     this.printTags();
   }
 
   arrowKeys = keypress => {
     this.arrowKeyHandler(keypress.key);
   }
-
 
   arrowKeyHandler = keycode => {
     console.log(keycode);
@@ -82,36 +84,49 @@ class App extends Component {
 
   printTags() {
     console.log('tags:');
-    for(var i = 0; i < this.state.annotationArray.length; i++) {
-      console.log(this.state.annotationArray[i]);
+    for(var i = 0; i < this.state.annotations.length; i++) {
+      console.log(this.state.annotations[i]);
     }
   }
 
-  tagsList() {
-    return this.state.annotationArray.map(function(currentTag, i) {
-      return <var tag ={currentTag} key={i} />;
-    })
+
+  displayAnnotation = () => {
+    this.setState({
+      displayAnnotations: !this.state.displayAnnotations
+    });
   }
 
 
   render() {
     // before render set video duration, so progress bar is set correctly
+    let annotations = null;
+    if(this.state.displayAnnotations) {
+      annotations = (
+        <div>
+          { this.state.annotations.map((annotation, index) => {
+            return <Annotation key={annotation.id}
+            timestamp={annotation.timestamp} />
+          })}
+        </div>
+      )
+    }
+
     return (
       <div className="App" tabIndex="0" onKeyDown={this.arrowKeys}>
 
+        <div>
+          <video ref="vidRef" width="560" height="315">
+            <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
+          </video>
+          <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
+        </div>
 
-      <div>
-        <video ref="vidRef" width="560" height="315">
-          <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
-        </video>
-        <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
-      </div>
-      <div>
-        <video ref="vidRef2" width="560" height="315">
-          <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
-        </video>
-        <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
-      </div>
+        <div>
+          <video ref="vidRef2" width="560" height="315">
+            <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
+          </video>
+          <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
+        </div>
 
         <div>
           <button onClick={this.playVideo.bind(this)}>PLAY</button>
@@ -124,32 +139,16 @@ class App extends Component {
 
         <div>
           <button onClick={this.timestampVideo.bind(this)}>TIMESTAMP</button>
-          <button onClick={this.getVideoLenght.bind(this)}>VIDEO LENGHT</button>
-
+          <button onClick={this.getVideoLenght.bind(this)}>VIDEO LENGTH</button>
         </div>
 
         <div>
-          <table style={{border:'1px black solid'}}>
-            <thead>
-              <tr>
-                <th>Timestamps</th>
-              </tr>
-            </thead>
-
-            <tbody>
-            {/* want to render updating annotations list here*/}
-              <tr><td>test1</td></tr>
-              <tr><td>test2</td></tr>
-            </tbody>
-
-          </table>
+          <button className="btn" onClick={this.displayAnnotation}>View Annotations</button>
+            {annotations}
+          </div>
         </div>
-
-      </div>
     );
-
   }
-
 }
 
 export default App;
