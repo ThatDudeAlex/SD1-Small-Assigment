@@ -11,6 +11,8 @@ class App extends Component {
       timestamp: props.timestamp,
       annotationArray: [],
       progress: 0,
+      isPlaying: false,
+      timeSet: false,
       videoDuration: 100, // need to set to videos actual duration
       displayAnnotations: false,
       annotations: []
@@ -21,16 +23,31 @@ class App extends Component {
     this.refs.vidRef.play();
     this.refs.vidRef2.play();
 
+    this.setState({ isPlaying: true });
+    this.setVideoLenght();
     // need to get progress bar to automatically update progress bars value
+  }
+
+  setVideoLenght() {
+    if (this.state.timeSet === false)
+      this.setState({ timeSet: true, videoDuration: this.refs.vidRef.duration });
   }
 
   pauseVideo() {
     this.refs.vidRef.pause();
     this.refs.vidRef2.pause();
+    this.setState({ isPlaying: false });
   }
 
   timestampVideo() {
     console.log(this.refs.vidRef.currentTime);
+  }
+
+  updateVideo1Time() {
+    document.getElementById('vidio1-time').textContent = this.refs.vidRef.currentTime;
+  }
+  updateVideo2Time() {
+    document.getElementById('vidio2-time').textContent = this.refs.vidRef.currentTime;
   }
 
   forwardVideo() {
@@ -38,7 +55,7 @@ class App extends Component {
     this.refs.vidRef2.currentTime += 0.0333;
     this.timestampVideo();
 
-    this.setState({progress: this.state.progress + 0.0333});
+    this.setState({ progress: this.state.progress + 0.0333});
   }
 
   rewindVideo() {
@@ -46,7 +63,7 @@ class App extends Component {
     this.refs.vidRef2.currentTime -= 0.0333;
     this.timestampVideo();
 
-    this.setState({progress: this.state.progress - 0.0333});
+    this.setState({ progress: this.state.progress - 0.0333});
   }
 
   restartVideo() {
@@ -54,7 +71,18 @@ class App extends Component {
     this.refs.vidRef2.currentTime = 0.0;
     this.timestampVideo();
 
-    this.setState({progress: 0});
+    this.setState({ progress: 0 });
+  }
+
+  updateProgressBar() {
+    if (this.state.isPlaying)
+      this.setState({ progress: this.state.progress + 0.0333 });
+  }
+
+  videoPlaying() {
+    this.updateProgressBar();
+    this.updateVideo1Time();
+    this.updateVideo2Time();
   }
 
   getVideoLenght() {
@@ -62,11 +90,11 @@ class App extends Component {
   }
 
   setVideoLength() {
-    this.setState({videoDuration: this.state.vidRef.duration});
+    this.setState({ videoDuration: this.state.vidRef.duration });
   }
 
   addAnnotation() {
-    this.setState({annotations: [...this.state.annotations, {id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime}]});
+    this.setState({ annotations: [...this.state.annotations, { id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime }] });
     this.printTags();
   }
 
@@ -84,7 +112,7 @@ class App extends Component {
 
   printTags() {
     console.log('tags:');
-    for(var i = 0; i < this.state.annotations.length; i++) {
+    for (var i = 0; i < this.state.annotations.length; i++) {
       console.log(this.state.annotations[i]);
     }
   }
@@ -96,36 +124,45 @@ class App extends Component {
     });
   }
 
-
   render() {
     // before render set video duration, so progress bar is set correctly
     let annotations = null;
-    if(this.state.displayAnnotations) {
+    if (this.state.displayAnnotations) {
       annotations = (
         <div>
-          { this.state.annotations.map((annotation, index) => {
+          {this.state.annotations.map((annotation, index) => {
             return <Annotation key={annotation.id}
-            timestamp={annotation.timestamp} />
+              timestamp={annotation.timestamp} />
           })}
         </div>
       )
     }
-
+    
     return (
       <div className="App" tabIndex="0" onKeyDown={this.arrowKeys}>
-
+        
         <div>
-          <video ref="vidRef" width="560" height="315">
+          <video ref="vidRef" width="560" height="315" onTimeUpdate={this.videoPlaying.bind(this)}>
             <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
           </video>
-          <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
+
+          <div>
+            <span id='vidio1-time'></span>
+            <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{ width: "400px" }}></progress>
+            <span></span>
+          </div>
+
         </div>
 
         <div>
-          <video ref="vidRef2" width="560" height="315">
+          <video ref="vidRef2" width="560" height="315" onTimeUpdate={this.updateVideo2Time.bind(this)}>
             <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
           </video>
-          <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{width:"400px"}}></progress>
+          <div>
+            <span id='vidio2-time' ></span>
+            <progress id="progressBar2" value={this.state.progress} max={this.state.videoDuration} style={{ width: "400px" }}></progress>
+            <span></span>
+          </div>
         </div>
 
         <div>
@@ -144,9 +181,9 @@ class App extends Component {
 
         <div>
           <button className="btn" onClick={this.displayAnnotation}>View Annotations</button>
-            {annotations}
-          </div>
+          {annotations}
         </div>
+      </div>
     );
   }
 }
