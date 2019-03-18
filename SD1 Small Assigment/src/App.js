@@ -10,7 +10,8 @@ class App extends Component {
       timestamp: props.timestamp,
       annotationArray: [],
       progress: 0,
-      videoDuration: 100 // need to set to videos actual duration
+      videoDuration: 100, // need to set to videos actual duration
+      test: [1, 2, 3]
     };
   }
 
@@ -62,9 +63,7 @@ class App extends Component {
   }
 
   addAnnotation() {
-    var initArray = this.state.annotationArray;
-    var newArray = [initArray, this.refs.vidRef.currentTime];
-    this.setState({annotationArray:newArray});
+    this.setState({annotationArray: [...this.state.annotationArray, this.refs.vidRef.currentTime]});
     this.printTags();
   }
 
@@ -82,8 +81,9 @@ class App extends Component {
   }
 
   printTags() {
+    console.log('tags:');
     for(var i = 0; i < this.state.annotationArray.length; i++) {
-      console.log(this.state.annotationArray);
+      console.log(this.state.annotationArray[i]);
     }
   }
 
