@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  vertical-align:top;
+  width: 100%;
+  background-color: #edeff0;
 }
 
 .App-logo {
@@ -31,3 +34,80 @@
     transform: rotate(360deg);
   }
 }
+
+.progress-bar-wrapper {
+  background-color: #2f363c;
+  height: 27px;
+  width: 560px;
+  margin: auto;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.c {
+  height: 27px;
+  width: 100%;
+}
+
+.right {
+  height: 27px;
+  float:right;
+  width:100px;
+}
+
+.progress-bar {
+  height: 8px;
+  width: 2px;
+  transform: translateY(50%);
+  border: 3px solid #2f363c;
+  border-radius: 10px;
+  background-color: lime;
+}
+
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+  transform: translateX(0%);
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/*Chrome*/
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  input[type='range'] {
+    overflow: hidden;
+    width: 100%;
+    border-radius: 10px;
+    -webkit-appearance: none;
+    background-color: #2f363c;
+  }
+  
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 10px;
+    -webkit-appearance: none;
+    color: #2f363c;
+    margin-top: -1px;
+  }
+  
+  input[type='range']::-webkit-slider-thumb {
+    width: 1px;
+    -webkit-appearance: none;
+    height: 1px;
+    cursor: ew-resize;
+    background: lime;
+    box-shadow: -300px 0 0 300px lime;
+  }
+
+}
+

@@ -15,39 +15,39 @@ class App extends Component {
       timeSet: false,
       videoDuration: 100, // need to set to videos actual duration
       displayAnnotations: false,
-      annotations: []
+      annotations: [],
+      duration: 0,
+      width2: 0,
+      time: 0
     };
   }
 
-  playVideo() {
-    this.refs.vidRef.play();
-    this.refs.vidRef2.play();
-
-    this.setState({ isPlaying: true });
-    this.setVideoLenght();
-    // need to get progress bar to automatically update progress bars value
+  componentDidMount() {
+    this.video = document.getElementById('vid1');
+    this.setState({ duration: this.video.duration});
+    this.video2 = document.getElementById('vid2');
   }
+
+
+  playVideo() {
+
+    if (this.refs.vidRef.paused) {
+      this.video.play();
+      this.video2.play();
+    } else {
+      this.video.pause();
+      this.video2.pause();
+    }
+  }
+
 
   setVideoLenght() {
     if (this.state.timeSet === false)
       this.setState({ timeSet: true, videoDuration: this.refs.vidRef.duration });
   }
 
-  pauseVideo() {
-    this.refs.vidRef.pause();
-    this.refs.vidRef2.pause();
-    this.setState({ isPlaying: false });
-  }
-
   timestampVideo() {
     console.log(this.refs.vidRef.currentTime);
-  }
-
-  updateVideo1Time() {
-    document.getElementById('vidio1-time').textContent = this.refs.vidRef.currentTime;
-  }
-  updateVideo2Time() {
-    document.getElementById('vidio2-time').textContent = this.refs.vidRef.currentTime;
   }
 
   forwardVideo() {
@@ -55,7 +55,7 @@ class App extends Component {
     this.refs.vidRef2.currentTime += 0.0333;
     this.timestampVideo();
 
-    this.setState({ progress: this.state.progress + 0.0333});
+    this.setState({ progress: this.state.progress + 0.0333 });
   }
 
   rewindVideo() {
@@ -63,7 +63,7 @@ class App extends Component {
     this.refs.vidRef2.currentTime -= 0.0333;
     this.timestampVideo();
 
-    this.setState({ progress: this.state.progress - 0.0333});
+    this.setState({ progress: this.state.progress - 0.0333 });
   }
 
   restartVideo() {
@@ -98,15 +98,16 @@ class App extends Component {
     this.printTags();
   }
 
-  arrowKeys = keypress => {
-    this.arrowKeyHandler(keypress.key);
+  spaceKey = keypress => {
+    if (keypress.key === " ")
+      this.playVideo();
   }
 
-  arrowKeyHandler = keycode => {
-    console.log(keycode);
-    if (keycode === 'ArrowLeft')
+  arrowKeyHandler = keypress => {
+    console.log(keypress.key);
+    if (keypress.key === 'ArrowLeft')
       this.rewindVideo();
-    else if (keycode === 'ArrowRight')
+    else if (keypress.key === 'ArrowRight')
       this.forwardVideo();
   }
 
@@ -124,6 +125,34 @@ class App extends Component {
     });
   }
 
+
+  updateProgressBar = () => {
+    const { currentTime, duration, clientWidth } = this.video;
+    const progressBarWidth = clientWidth * (currentTime / duration)
+    document.getElementById("popup").innerHTML = Math.floor(this.video.currentTime) + '/' + Math.floor(this.video.duration);
+
+    this.setState({
+      time: progressBarWidth,
+    });
+  }
+
+  updateProgressBar2 = () => {
+    const { currentTime, duration, clientWidth } = this.video2;
+    const progressBarWidth = clientWidth * (currentTime / duration)
+    document.getElementById("popup2").innerHTML = Math.floor(this.video.currentTime) + '/' + Math.floor(this.video.duration);
+
+    this.setState({
+      width2: progressBarWidth,
+    });
+  }
+
+  popup() {
+    console.log('here');
+  }
+  oninput() {
+    //output.innerHTML = this.value;
+  }
+
   render() {
     // before render set video duration, so progress bar is set correctly
     let annotations = null;
@@ -137,37 +166,44 @@ class App extends Component {
         </div>
       )
     }
-    
+
+    const progressBarStyle = {
+      duration: this.state.duration
+    };
+
+    const progressBarStyle2 = {
+      width: this.state.width2
+    };
+
     return (
-      <div className="App" tabIndex="0" onKeyDown={this.arrowKeys}>
-        
-        <div>
-          <video ref="vidRef" width="560" height="315" onTimeUpdate={this.videoPlaying.bind(this)}>
+      <div className="App" tabIndex="0" onKeyDown={this.arrowKeyHandler} onKeyUp={this.spaceKey} >
+
+        <div className="App">
+          <video id="vid1" style={progressBarStyle} ref="vidRef" width="560" height="315" onTimeUpdate={this.updateProgressBar}>
             <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
           </video>
+          <div id="popup"></div>
+          <div className="progress-bar-wrapper" onMouseOver={this.popup}>
 
-          <div>
-            <span id='vidio1-time'></span>
-            <progress id="progressBar1" value={this.state.progress} max={this.state.videoDuration} style={{ width: "400px" }}></progress>
-            <span></span>
-          </div>
-
-        </div>
-
-        <div>
-          <video ref="vidRef2" width="560" height="315" onTimeUpdate={this.updateVideo2Time.bind(this)}>
-            <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
-          </video>
-          <div>
-            <span id='vidio2-time' ></span>
-            <progress id="progressBar2" value={this.state.progress} max={this.state.videoDuration} style={{ width: "400px" }}></progress>
-            <span></span>
+            <input type="range" min="0" value= {this.state.time} className="slider" max={this.state.duration} id="myRange" 
+              onChange={this.oninput} step="1" />
+            />
+            {/* <div ref={(ref) => { this.progressBar = ref; }} className="progress-bar" style={progressBarStyle} /> */}
           </div>
         </div>
 
         <div>
-          <button onClick={this.playVideo.bind(this)}>PLAY</button>
-          <button onClick={this.pauseVideo.bind(this)}>PAUSE</button>
+          <video id="vid2" ref="vidRef2" width="560" height="315" onTimeUpdate={this.updateProgressBar2}>
+            <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
+          </video>
+          <div id="popup2"></div>
+          <div className="progress-bar-wrapper" >
+            <div ref={(ref) => { this.progressBar = ref; }} className="progress-bar" style={progressBarStyle2} />
+          </div>
+        </div>
+
+        <div>
+          <button onClick={this.playVideo.bind(this)}>PLAY/PAUSE</button>
           <button onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button onClick={this.rewindVideo.bind(this)}>REWIND</button>
           <button onClick={this.restartVideo.bind(this)}>RESTART</button>
