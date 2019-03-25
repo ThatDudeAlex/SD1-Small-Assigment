@@ -11,7 +11,8 @@ class App extends Component {
       timestamp: props.timestamp,
       annotationArray: [],
       displayAnnotations: false,
-      annotations: []
+      annotations: [],
+      tagMode: false
     };
   }
 
@@ -38,9 +39,9 @@ class App extends Component {
 
   // changes video playback time based on where user clicks/drags progress bar
   onChange = event => {
-    if (event.currentTarget.id === "myRange")
+    if ((event.currentTarget.id === "myRange") && (this.state.tagMode === false))
       this.video.currentTime = event.currentTarget.value;
-    if (event.currentTarget.id === "myRange2")
+    if (event.currentTarget.id === "myRange2" && (this.state.tagMode === false))
       this.video2.currentTime = event.currentTarget.value;
   }
 
@@ -53,6 +54,16 @@ class App extends Component {
       this.video.pause();
       this.video2.pause();
     }
+  }
+
+  // Plays & Pauses a video when clicked
+  videoClicked = event => {
+    const video = event.currentTarget;
+    console.log(video);
+    if (video.paused)
+      video.play();
+    else
+      video.pause();
   }
 
   // fast forwards frame by frame 
@@ -121,7 +132,7 @@ class App extends Component {
   }
 
   addAnnotation() {
-    this.setState({ annotations: [...this.state.annotations, { id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime}] });
+    this.setState({ annotations: [...this.state.annotations, { id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime }] });
     this.printTags();
   }
 
@@ -138,6 +149,12 @@ class App extends Component {
     });
   }
 
+  tagMode = () => {
+    if (this.state.tagMode)
+      this.setState({ tagMode: false });
+    else
+      this.setState({ tagMode: true });
+  }
 
 
   render() {
@@ -154,7 +171,7 @@ class App extends Component {
       paddingBottom: 40
     };
 
-    
+
     let annotations = null;
     if (this.state.displayAnnotations) {
       annotations = (
@@ -170,16 +187,15 @@ class App extends Component {
 
     return (
       <div className="App" tabIndex="0" onKeyDown={this.arrowKeyHandler} onKeyUp={this.spaceKey}>
-
-        <video id="vid1" ref="vidRef" width="760" height="415"
-          onLoadedMetadata={this.handleMetadata} onTimeUpdate={this.changeInVideoTime} >
+        <video id="vid1" ref="vidRef" width="760" height="415" className="videos"
+          onClick={this.videoClicked} onLoadedMetadata={this.handleMetadata} onTimeUpdate={this.changeInVideoTime} >
           <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
         </video>
 
         <span className="gap"></span>
 
-        <video id="vid2" ref="vidRef2" width="760" height="415"
-          onLoadedMetadata={this.handleMetadata} onTimeUpdate={this.changeInVideoTime}>
+        <video id="vid2" ref="vidRef2" width="760" height="415" className="videos"
+          onClick={this.videoClicked} onLoadedMetadata={this.handleMetadata} onTimeUpdate={this.changeInVideoTime}>
           <source id="testVideo" src="http://media.w3.org/2010/05/sintel/trailer.mp4" type="video/mp4" />
         </video>
 
@@ -205,15 +221,16 @@ class App extends Component {
         </div>
 
         <div>
-          <button onClick={this.playVideo.bind(this)}>PLAY/PAUSE</button>
-          <button onClick={this.forwardVideo.bind(this)}>FORWARD</button>
-          <button onClick={this.rewindVideo.bind(this)}>REWIND</button>
-          <button onClick={this.restartVideo.bind(this)}>RESTART</button>
-          <button onClick={this.addAnnotation.bind(this)}>ADD TAG</button>
+          <button className="playback-buttons" onClick={this.playVideo.bind(this)}>PLAY/PAUSE</button>
+          <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
+          <button className="playback-buttons" onClick={this.rewindVideo.bind(this)}>REWIND</button>
+          <button className="playback-buttons" onClick={this.restartVideo.bind(this)}>RESTART</button>
+          <button className="playback-buttons" onClick={this.addAnnotation.bind(this)}>ADD TAG</button>
         </div>
 
         <div style={this.styles}>
-          <button className="btn" onClick={this.displayAnnotation}>View Annotations</button>
+          {/* <button className="btn" onClick={this.tagMode}>Tags</button> */}
+          <button className="playback-buttons" onClick={this.displayAnnotation}>View Annotations</button>
           {annotations}
         </div>
 
@@ -222,5 +239,7 @@ class App extends Component {
     );
   }
 }
+
+
 
 export default App;

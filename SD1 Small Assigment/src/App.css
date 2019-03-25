@@ -24,7 +24,11 @@
 }
 
 .App-link {
-  color: #61dafb;
+  color: black;
+}
+
+.videos:hover{
+  opacity: 0.8;
 }
 
 @keyframes App-logo-spin {
@@ -55,24 +59,12 @@
   margin-bottom: 5px;
 }
 
-.c {
-  height: 315px;
-  width: 100px;
-  background-color: lime;
-}
-
 .gap {
   margin-right: 50px;
 }
 
 .gap2 {
   margin-right: 65px;
-}
-
-.right {
-  height: 27px;
-  float:right;
-  width:100px;
 }
 
 .progress-bar {
@@ -100,6 +92,22 @@
 /* Mouse-over effects */
 .slider:hover {
   opacity: 1; /* Fully shown on mouse-over */
+}
+
+.tag{
+  color: red;
+  width: 1px;
+  height: 1px;
+  border: 3px solid #2f363c;
+  border-radius: 10px;
+}
+
+.playback-buttons{
+  color: white;
+  background-color: black;
+  text-align: center;
+  border: 3px solid #2f363c;
+  font-size: 30px;
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
