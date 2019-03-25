@@ -59,21 +59,33 @@ class App extends Component {
   // Plays & Pauses a video when clicked
   videoClicked = event => {
     const video = event.currentTarget;
-    console.log(video);
+    //console.log(video);
     if (video.paused)
       video.play();
     else
       video.pause();
   }
 
-  // fast forwards frame by frame 
+  // fast forwards 1 second at a time
   forwardVideo() {
+    this.video.currentTime += 0.7; // 1/30 because most video are 30 frames per second
+    this.video2.currentTime += 0.7;
+  }
+
+  // fast forwards frame by frame 
+  nextVideoFrame() {
     this.video.currentTime += 0.0333; // 1/30 because most video are 30 frames per second
     this.video2.currentTime += 0.0333;
   }
 
-  // rewinds back frame by frame
+  // rewinds back 1 second at a time
   rewindVideo() {
+    this.video.currentTime -= 0.7; // 1/30 because most video are 30 frames per second
+    this.video2.currentTime -= 0.7;
+  }
+
+  // rewinds back frame by frame
+  previousVideoFrame() {
     this.video.currentTime -= 0.0333; // 1/30 because most video are 30 frames per second
     this.video2.currentTime -= 0.0333;
   }
@@ -132,7 +144,7 @@ class App extends Component {
   }
 
   addAnnotation() {
-    this.setState({ annotations: [...this.state.annotations, { id: this.state.annotations.length, timestamp: this.refs.vidRef.currentTime }] });
+    this.setState({ annotations: [...this.state.annotations, { id: this.state.annotations.length, timestamp: this.formatTime(this.video.currentTime)}] });
     this.printTags();
   }
 
@@ -168,17 +180,20 @@ class App extends Component {
 
     // adds space between progress bar and buttons
     const styles2 = {
-      paddingBottom: 40
+      color: 'white',
+      paddingBottom: 80
     };
 
 
     let annotations = null;
     if (this.state.displayAnnotations) {
       annotations = (
-        <div style={this.styles}>
+        <div>
           {this.state.annotations.map((annotation, index) => {
-            return <Annotation key={annotation.id}
-              timestamp={annotation.timestamp} />
+            return <Annotation
+              key={annotation.id}
+              timestamp={annotation.timestamp}
+            />
           })}
         </div>
       )
@@ -222,24 +237,27 @@ class App extends Component {
 
         <div>
           <button className="playback-buttons" onClick={this.playVideo.bind(this)}>PLAY/PAUSE</button>
-          <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button className="playback-buttons" onClick={this.rewindVideo.bind(this)}>REWIND</button>
+          <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button className="playback-buttons" onClick={this.restartVideo.bind(this)}>RESTART</button>
           <button className="playback-buttons" onClick={this.addAnnotation.bind(this)}>ADD TAG</button>
         </div>
 
-        <div style={this.styles}>
+        <div>
+          <button className="playback-buttons" onClick={this.previousVideoFrame.bind(this)}>PREVIOUS FRAME</button>
+          <button className="playback-buttons" onClick={this.nextVideoFrame.bind(this)}>NEXT FRAME</button>
+          <button className="playback-buttons">Save Tags</button>
+        </div>
+
+        <div style={this.styles2}>
           {/* <button className="btn" onClick={this.tagMode}>Tags</button> */}
           <button className="playback-buttons" onClick={this.displayAnnotation}>View Annotations</button>
           {annotations}
         </div>
-
-
+        
       </div>
     );
   }
 }
-
-
 
 export default App;
