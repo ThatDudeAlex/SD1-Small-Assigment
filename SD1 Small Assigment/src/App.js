@@ -17,7 +17,7 @@ class App extends Component {
     };
   }
 
-  // use to get video ref when mounted
+  // used to get video ref when mounted
   componentDidMount() {
     this.video = document.getElementById('vid1');
     this.video2 = document.getElementById('vid2');
@@ -67,14 +67,26 @@ class App extends Component {
       video.pause();
   }
 
-  // fast forwards frame by frame
+  // fast forwards videos
   forwardVideo() {
+    this.video.currentTime += 0.7; // 1/30 because most video are 30 frames per second
+    this.video2.currentTime += 0.7;
+  }
+
+  // fast forwards frame by frame
+  nextVideoFrame() {
     this.video.currentTime += 0.0333; // 1/30 because most video are 30 frames per second
     this.video2.currentTime += 0.0333;
   }
 
-  // rewinds back frame by frame
+  // rewinds back videos
   rewindVideo() {
+    this.video.currentTime -= 0.7; // 1/30 because most video are 30 frames per second
+    this.video2.currentTime -= 0.7;
+  }
+
+  // rewinds back frame by frame
+  previousVideoFrame() {
     this.video.currentTime -= 0.0333; // 1/30 because most video are 30 frames per second
     this.video2.currentTime -= 0.0333;
   }
@@ -125,11 +137,15 @@ class App extends Component {
 
   // rewinds and fast-forward with arrow keys
   arrowKeyHandler = keypress => {
-    //console.log(keypress.key);
+    console.log(keypress.key);
     if (keypress.key === 'ArrowLeft')
       this.rewindVideo();
     else if (keypress.key === 'ArrowRight')
       this.forwardVideo();
+    else if (keypress.key === ',')
+      this.previousVideoFrame();
+    else if (keypress.key === '.')
+      this.nextVideoFrame();
   }
 
   // want to use parameter to setState?
@@ -172,6 +188,13 @@ class App extends Component {
     });
   }
 
+  annotationClicked = event => {
+    if (event.currentTarget.className === "vid1")
+      this.video.currentTime = parseInt(event.currentTarget.textContent);
+    else if (event.currentTarget.className === "vid2")
+      this.video2.currentTime = parseInt(event.currentTarget.textContent);
+  }
+
   tagMode = () => {
     if (this.state.tagMode)
       this.setState({ tagMode: false });
@@ -204,8 +227,12 @@ class App extends Component {
       annotations1 = (
         <div style={tag}>
           {this.state.annotations1.map((annotation, index) => {
-            return <Annotation key={annotation.id}
-              timestamp={annotation.timestamp} />
+            return <Annotation
+              vid="vid1"
+              key={annotation.id}
+              timestamp={annotation.timestamp}
+              goInVid={this.annotationClicked}
+            />
           })}
         </div>
       )
@@ -213,8 +240,12 @@ class App extends Component {
       annotations2 = (
         <div style={tag}>
           {this.state.annotations2.map((annotation, index) => {
-            return <Annotation key={annotation.id}
-              timestamp={annotation.timestamp} />
+            return <Annotation
+              vid="vid2"
+              key={annotation.id}
+              timestamp={annotation.timestamp}
+              goInVid={this.annotationClicked}
+            />
           })}
         </div>
       )
@@ -223,6 +254,9 @@ class App extends Component {
 
     return (
       <div className="App" tabIndex="0" onKeyDown={this.arrowKeyHandler} onKeyUp={this.spaceKey}>
+
+        <h1>Video Playback & Annotation Prototype</h1>
+
         <video id="vid1" ref="vidRef" width="760" height="415" className="videos"
           onClick={this.videoClicked} onLoadedMetadata={this.handleMetadata} onTimeUpdate={this.changeInVideoTime} >
           <source id="testVideo" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv" type="video/ogg" />
@@ -258,22 +292,27 @@ class App extends Component {
 
         <div>
           <button className="playback-buttons" onClick={this.playVideo.bind(this)}>PLAY/PAUSE</button>
-          <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button className="playback-buttons" onClick={this.rewindVideo.bind(this)}>REWIND</button>
+          <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button className="playback-buttons" onClick={this.restartVideo.bind(this)}>RESTART</button>
-          <button className="playback-buttons" onClick={this.addAnnotation1.bind(this)}>ADD TAG1</button>
-          <button className="playback-buttons" onClick={this.addAnnotation2.bind(this)}>ADD TAG2</button>
+          <button className="playback-buttons" id="annotation1" onClick={this.addAnnotation1.bind(this)}>ADD TAG1</button>
+          <button className="playback-buttons" id="annotation2"onClick={this.addAnnotation2.bind(this)}>ADD TAG2</button>
           <button className="playback-buttons" onClick={this.parallelAnnotate.bind(this)}>PARALLEL TAG</button>
         </div>
-//
+
+        <div>
+          <button className="playback-buttons" onClick={this.previousVideoFrame.bind(this)}>Previous Frame</button>
+          <button className="playback-buttons" onClick={this.nextVideoFrame.bind(this)}>Next Frame</button>
+        </div>
+
         <div style={this.styles}>
           {/* <button className="btn" onClick={this.tagMode}>Tags</button> */}
           <button className="playback-buttons" onClick={this.displayAnnotation}>View Annotations</button>
           <table style={tag}>
             <tr>Video1 Tags</tr>
-              <th>{annotations1}</th>
+            <th>{annotations1}</th>
             <tr>Video2 Tags</tr>
-              <th>{annotations2}</th>
+            <th>{annotations2}</th>
           </table>
         </div>
       </div>

@@ -3,12 +3,9 @@ import { whileStatement } from 'babel-types';
 import './App.css';
 
 const Annotation = (props) => {
-  const styles = {
-    color: 'white'
-  }
   return (
-    <div className="Annotation">
-      <p>{props.timestamp}</p>
+    <div className="Annotation" >
+      <p onClick={props.goInVid} className={props.vid}>{props.timestamp}</p>
     </div>
   )
 };
