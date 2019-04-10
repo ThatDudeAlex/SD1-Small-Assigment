@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Annotation from './Annotation.js';
+import SpanAnnotation from './SpanAnnotation.js';
 
 class App extends Component {
 
@@ -9,11 +10,15 @@ class App extends Component {
     this.state = {
       source: props.source,
       timestamp: props.timestamp,
-      annotationArray: [],
+      startTimestamp: props.startTimestamp,
+      endTimestamp: props.endTimestamp,
       displayAnnotations: false,
+      displaySpanAnnotations: false,
       annotations1: [],
       annotations2: [],
-      tagMode: false
+      spanAnnotations1: [],
+      spanAnnotations2: [],
+      tagMode: false,
     };
   }
 
@@ -97,6 +102,14 @@ class App extends Component {
     this.video2.currentTime = 0.0;
   }
 
+  syncToVid1() {
+    this.video2.currentTime = this.video.currentTime;
+  }
+
+  syncToVid2() {
+    this.video.currentTime = this.video2.currentTime;
+  }
+
   // when change occurs in a videos time, display its current playback time
   changeInVideoTime = event => {
     const currentTime = Math.floor(event.currentTarget.currentTime);
@@ -167,7 +180,38 @@ class App extends Component {
   parallelAnnotate() {
     this.addAnnotation2();
     this.addAnnotation1();
+  }
 
+  setSpanStart1() {
+    this.setState({startTimestamp: this.refs.vidRef.currentTime});
+    console.log(this.state.startTimestamp);
+  }
+
+  setSpanEnd1() {
+    // make so end cant be eariler than start
+    this.setState({endTimestamp: this.refs.vidRef.currentTime});
+    console.log(this.state.endTimestamp);
+  }
+
+  addSpanAnnotation1() {
+    this.setState({ spanAnnotations1: [...this.state.spanAnnotations1, { id: this.state.spanAnnotations1.length, startTimestamp: this.state.startTimestamp, endTimestamp: this.state.endTimestamp }] });
+    this.printSpanTags();
+  }
+
+  setSpanStart2() {
+    this.setState({startTimestamp: this.refs.vidRef2.currentTime});
+    console.log(this.state.startTimestamp);
+  }
+
+  setSpanEnd2() {
+    // make so end cant be eariler than start
+    this.setState({endTimestamp: this.refs.vidRef2.currentTime});
+    console.log(this.state.endTimestamp);
+  }
+
+  addSpanAnnotation2() {
+    this.setState({ spanAnnotations2: [...this.state.spanAnnotations2, { id: this.state.spanAnnotations2.length, startTimestamp: this.state.startTimestamp, endTimestamp: this.state.endTimestamp }] });
+    this.printSpanTags();
   }
 
   printTags() {
@@ -182,17 +226,23 @@ class App extends Component {
     }
   }
 
+  printSpanTags() {
+    console.log('span tags1:');
+    for(var i = 0; i < this.state.spanAnnotations1.length; i++) {
+      console.log(this.state.spanAnnotations1[i]);
+    }
+  }
+
   displayAnnotation = () => {
     this.setState({
       displayAnnotations: !this.state.displayAnnotations
     });
   }
 
-  annotationClicked = event => {
-    if (event.currentTarget.className === "vid1")
-      this.video.currentTime = parseInt(event.currentTarget.textContent);
-    else if (event.currentTarget.className === "vid2")
-      this.video2.currentTime = parseInt(event.currentTarget.textContent);
+  displaySpanAnnotations = () => {
+    this.setState({
+      displaySpanAnnotations: !this.state.displaySpanAnnotations
+    });
   }
 
   tagMode = () => {
@@ -251,6 +301,35 @@ class App extends Component {
       )
     }
 
+    let spanAnnotations1 = null;
+    let spanAnnotations2 = null;
+    if (this.state.displaySpanAnnotations) {
+      spanAnnotations1 = (
+        <div style={tag}>
+          {this.state.spanAnnotations1.map((annotation, index) => {
+            return (
+              <div>
+                <p style={{display:"inline"}}>({annotation.startTimestamp},</p>
+                <p style={{display:"inline"}}> {annotation.endTimestamp})</p>
+              </div>);
+          })}
+        </div>
+      )
+
+      spanAnnotations2 = (
+        <div style={tag}>
+          {this.state.spanAnnotations2.map((annotation, index) => {
+            return (
+              <div>
+                <p style={{display:"inline"}}>({annotation.startTimestamp},</p>
+                <p style={{display:"inline"}}> {annotation.endTimestamp})</p>
+              </div>);
+          })}
+        </div>
+      )
+
+    }
+
 
     return (
       <div className="App" tabIndex="0" onKeyDown={this.arrowKeyHandler} onKeyUp={this.spaceKey}>
@@ -295,16 +374,26 @@ class App extends Component {
           <button className="playback-buttons" onClick={this.rewindVideo.bind(this)}>REWIND</button>
           <button className="playback-buttons" onClick={this.forwardVideo.bind(this)}>FORWARD</button>
           <button className="playback-buttons" onClick={this.restartVideo.bind(this)}>RESTART</button>
-          <button className="playback-buttons" id="annotation1" onClick={this.addAnnotation1.bind(this)}>ADD TAG1</button>
-          <button className="playback-buttons" id="annotation2"onClick={this.addAnnotation2.bind(this)}>ADD TAG2</button>
+          <button className="playback-buttons" onClick={this.syncToVid1.bind(this)}>SYNC TO 1</button>
+          <button className="playback-buttons" onClick={this.syncToVid2.bind(this)}>SYNC TO 2</button>
+        </div>
+        <div>
+          <button className="playback-buttons" onClick={this.addAnnotation1.bind(this)}>ADD TAG1</button>
+          <button className="playback-buttons" onClick={this.addAnnotation2.bind(this)}>ADD TAG2</button>
           <button className="playback-buttons" onClick={this.parallelAnnotate.bind(this)}>PARALLEL TAG</button>
         </div>
-
+          <button className="playback-buttons" onClick={this.setSpanStart1.bind(this)}>Set Span Start 1</button>
+          <button className="playback-buttons" onClick={this.setSpanEnd1.bind(this)}>Set Span End 1</button>
+          <button className="playback-buttons" onClick={this.addSpanAnnotation1.bind(this)}>Add Span Tag1</button>
         <div>
-          <button className="playback-buttons" onClick={this.previousVideoFrame.bind(this)}>Previous Frame</button>
-          <button className="playback-buttons" onClick={this.nextVideoFrame.bind(this)}>Next Frame</button>
         </div>
+          <button className="playback-buttons" onClick={this.setSpanStart2.bind(this)}>Set Span Start 2</button>
+          <button className="playback-buttons" onClick={this.setSpanEnd2.bind(this)}>Set Span End 2</button>
+          <button className="playback-buttons" onClick={this.addSpanAnnotation2.bind(this)}>Add Span Tag2</button>
+        <div>
 
+        </div>
+//
         <div style={this.styles}>
           {/* <button className="btn" onClick={this.tagMode}>Tags</button> */}
           <button className="playback-buttons" onClick={this.displayAnnotation}>View Annotations</button>
@@ -313,6 +402,17 @@ class App extends Component {
             <th>{annotations1}</th>
             <tr>Video2 Tags</tr>
             <th>{annotations2}</th>
+          </table>
+        </div>
+
+        <div style={this.styles}>
+          {/* <button className="btn" onClick={this.tagMode}>Tags</button> */}
+          <button className="playback-buttons" onClick={this.displaySpanAnnotations}>View Span Annotations</button>
+          <table style={tag}>
+            <tr>Video1 Span Tags</tr>
+              <th>{spanAnnotations1}</th>
+            <tr>Video1 Span Tags</tr>
+              <th>{spanAnnotations2}</th>
           </table>
         </div>
       </div>

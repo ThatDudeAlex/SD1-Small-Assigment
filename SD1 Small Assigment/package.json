@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "env-cmd": "^8.0.2",
+    "mongoose": "^5.4.20",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"
@@ -11,7 +13,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "env-cmd ./config/dev.env nodemon src/server_index.js"
   },
   "eslintConfig": {
     "extends": "react-app"
